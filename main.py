@@ -49,7 +49,7 @@ if len(columns) > 2:
 #########################
 
 # Flag to determine whether to call ensemble method or not
-call_ensemble = False
+call_ensemble = True
 # base_models_list = ['ar', 'arima','theta','rfr','lstm','var'] # Default list of base models
 base_models_list = ['ar', 'arima','theta','var']
 
@@ -79,15 +79,6 @@ else:
 # predictions, y_test, score = var_predict(train, test, output_plots_path, timeseries_name, 3)
 # print('VAR r2-score: ', score)
 
-
-
-# Call rfr_ensemble
-base_models_df = pd.read_csv(output_path + '/' + 'base_model_predictions.csv')
-base_models_df.drop(['Unnamed: 0'], axis = 1, inplace = True) 
-base_model_predictions = base_models_df.to_dict('dict')
-
-ensemble_predictions, y_test, ensemble_score = rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, base_model_predictions)
-print('RF ensemble r2-score: ', ensemble_score)
 
 # Ensemble method
 if call_ensemble:
@@ -129,3 +120,15 @@ if call_ensemble:
     ensemble_predictions, y_test, ensemble_score = rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, base_model_predictions)
     print('RF ensemble r2-score: ', ensemble_score)
 print('End of program')
+
+
+
+###### THIS SECTION BELOW IS FOR TESTING PURPOSES OF ENSEMBLE METHOD. PLEASE IGNORE. ######
+# Call rfr_ensemble
+# base_models_df = pd.read_csv(output_path + '/' + 'base_model_predictions.csv')
+# base_models_df.drop(['Unnamed: 0'], axis = 1, inplace = True) 
+# base_model_predictions = base_models_df.to_dict('dict')
+
+# ensemble_predictions, y_test, ensemble_score = rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, base_model_predictions)
+# print('RF ensemble r2-score: ', ensemble_score)
+############################################################################################
