@@ -169,6 +169,14 @@ def var_bike_predict(train, test, output_plots_path, timeseries_name, p):
     plt.savefig(output_plots_path + '/VAR-' + timeseries_name + '.png')
     # plt.show()
 
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/VAR-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/VAR-true_values.csv', index=False)
+
     return predictions, test_diff, score
 
 ##################################################################################################################################
@@ -258,5 +266,11 @@ def var_predict(train, test, output_plots_path, timeseries_name, p):
     
     plt.savefig(output_plots_path + '/VAR-' + timeseries_name + '.png')
     # plt.show()
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(value1_predictions, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/VAR-predictions.csv', index=False)
 
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/VAR-true_values.csv', index=False)
     return value1_predictions, test_diff, score

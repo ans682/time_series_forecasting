@@ -9,7 +9,7 @@ import time
 ##################################################################################################################################
 
 ##################################################################################################################################
-def theta_bike_predict(train, test, output_plots_path, timeseries_name):
+def theta_bike_predict(train, test, output_plots_path, timeseries_name, theta_parameters):
     train_raw = train
     test_raw = test
 
@@ -47,7 +47,7 @@ def theta_bike_predict(train, test, output_plots_path, timeseries_name):
             print('Completed ', t_i, ' predictions')
         current_t = t_i + train_size
         #######
-        model = ThetaModel(total_data[:current_t],deseasonalize=False)
+        model = ThetaModel(total_data[:current_t],deseasonalize=theta_parameters['deseasonalize'])
         fitted_model = model.fit()
         prediction = fitted_model.forecast().reset_index(drop=True)
         predictions.append(prediction[0])
@@ -88,12 +88,20 @@ def theta_bike_predict(train, test, output_plots_path, timeseries_name):
     plt.savefig(output_plots_path + '/Theta-' + timeseries_name + '.png')
     # plt.show()
 
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/Theta-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/Theta-true_values.csv', index=False)
+
     return predictions, test_diff, score
 
 ##################################################################################################################################
 
 ##################################################################################################################################
-def theta_predict(train, test, output_plots_path, timeseries_name):
+def theta_predict(train, test, output_plots_path, timeseries_name, theta_parameters):
     train_raw = train
     test_raw = test
 
@@ -123,7 +131,7 @@ def theta_predict(train, test, output_plots_path, timeseries_name):
             print('Completed ', t_i, ' predictions')
         current_t = t_i + train_size
         #######
-        model = ThetaModel(total_data[:current_t],deseasonalize=False)
+        model = ThetaModel(total_data[:current_t],deseasonalize=theta_parameters['deseasonalize'])
         fitted_model = model.fit()
         prediction = fitted_model.forecast().reset_index(drop=True)
         predictions.append(prediction[0])
@@ -151,7 +159,13 @@ def theta_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/Theta-' + timeseries_name + '.png')
     # plt.show()
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions[1:], columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/Theta-predictions.csv', index=False)
 
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/Theta-true_values.csv', index=False)
     return predictions, test_diff, score
 
 

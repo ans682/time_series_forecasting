@@ -9,7 +9,7 @@ import time
 ##################################################################################################################################
 
 ##################################################################################################################################
-def rfr_bike_predict(train, test, output_plots_path, timeseries_name):
+def rfr_bike_predict(train, test, output_plots_path, timeseries_name, rfr_parameters):
     train_raw = train
     test_raw = test
 
@@ -71,7 +71,7 @@ def rfr_bike_predict(train, test, output_plots_path, timeseries_name):
     predictions = []
 
     start_time = time.time()
-    rfr = RandomForestRegressor(bootstrap=False)
+    rfr = RandomForestRegressor(bootstrap=rfr_parameters['bootstrap'])
     rfr.fit(base_training_X, base_training_y)
 
 
@@ -118,6 +118,13 @@ def rfr_bike_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/RFR-' + timeseries_name + '.png')
     # plt.show()
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/RFR-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/RFR-true_values.csv', index=False)
 
     return predictions, test_diff, score
 
@@ -125,16 +132,33 @@ def rfr_bike_predict(train, test, output_plots_path, timeseries_name):
 ##################################################################################################################################
 
 ##################################################################################################################################
-def rfr_predict(train, test, output_plots_path, timeseries_name):
+def rfr_predict(train, test, output_plots_path, timeseries_name, rfr_parameters):
     train_raw = train
-    test_raw = test
+    # test_raw = test
+    
 
     train_size = train.shape[0] - 1
     test_size = test.shape[0]
     num_features = 25
-
+    # ///
     # Join train and test
-    total_data = train.tolist() + test.tolist() # This is the merged list now
+    # total_data = train.tolist() + test.tolist() # This is the merged list now
+    test_raw = test['Value1'].values.reshape(test_size, 1)
+    test_raw = test_raw.reshape(-1).tolist()
+    total_data = pd.concat([train, test], axis=0)
+
+    ######### SECTION FOR RESCALING THE TOTAL DATASET ###########
+    total_data_size = total_data.shape[0]
+    print('Size of differenced total data: ', len(total_data))
+    print('Type of total data: ', type(total_data))
+
+    # Get 'Value1' column's values
+    total_data = total_data['Value1'].values.reshape(total_data_size, 1)
+    print('total_data: ', total_data.shape)
+    total_data = total_data.reshape(-1).tolist()
+    # ///
+    # Join train and test
+    # total_data = train.tolist() + test.tolist() # This is the merged list now
     
     # Difference time series, i.e. use returns
     total_data = difference(total_data)
@@ -168,7 +192,7 @@ def rfr_predict(train, test, output_plots_path, timeseries_name):
     predictions = []
 
     start_time = time.time()
-    rfr = RandomForestRegressor(bootstrap=False)
+    rfr = RandomForestRegressor(bootstrap=rfr_parameters['bootstrap'])
     rfr.fit(base_training_X, base_training_y)
 
 
@@ -186,7 +210,7 @@ def rfr_predict(train, test, output_plots_path, timeseries_name):
     print("Time executed: ", total_time)
     print("Size of predictions: ", len(predictions))
 
-    test_diff = difference(test_raw.tolist())
+    test_diff = difference(test_raw)
 
     # Calculate the R2 score using the predictions and the true values
     score = r2_score(test_diff, predictions[1:])
@@ -203,5 +227,12 @@ def rfr_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/RFR-' + timeseries_name + '.png')
     # plt.show()
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions[1:], columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/RFR-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/RFR-true_values.csv', index=False)
 
     return predictions, test_diff, score

@@ -9,7 +9,7 @@ import numpy as np
 ##################################################################################################################################
 
 ##################################################################################################################################
-def arima_bike_predict(train, test, output_plots_path, timeseries_name):
+def arima_bike_predict(train, test, output_plots_path, timeseries_name, arima_parameters):
     train_raw = train
     test_raw = test
 
@@ -50,7 +50,7 @@ def arima_bike_predict(train, test, output_plots_path, timeseries_name):
         if t_i % 50 == 0:
             print('Completed ', t_i, ' predictions')
         current_t = t_i + train_size
-        model = ARIMA(total_data[:current_t], order = (5,0,0))
+        model = ARIMA(total_data[:current_t], order = (arima_parameters['p'],arima_parameters['d'],arima_parameters['q']))
         fitted_model = model.fit()
         prediction = fitted_model.forecast()
         predictions.append(prediction[0])
@@ -91,13 +91,21 @@ def arima_bike_predict(train, test, output_plots_path, timeseries_name):
     plt.savefig(output_plots_path + '/ARIMA-' + timeseries_name + '.png')
     # plt.show()
 
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/ARIMA-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/ARIMA-true_values.csv', index=False)
+
     return predictions, test_diff, score
 
 
 ##################################################################################################################################
 
 ##################################################################################################################################
-def arima_predict(train, test, output_plots_path, timeseries_name):
+def arima_predict(train, test, output_plots_path, timeseries_name, arima_parameters):
     train_raw = train
     test_raw = test
 
@@ -123,7 +131,7 @@ def arima_predict(train, test, output_plots_path, timeseries_name):
         if t_i % 50 == 0:
             print('Completed ', t_i, ' predictions')
         current_t = t_i + train_size
-        model = ARIMA(total_data[:current_t], order = (5,0,0))
+        model = ARIMA(total_data[:current_t], order = (arima_parameters['p'],arima_parameters['d'],arima_parameters['q']))
         fitted_model = model.fit()
         prediction = fitted_model.forecast()
         predictions.append(prediction[0])
@@ -150,6 +158,13 @@ def arima_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/ARIMA-' + timeseries_name + '.png')
     # plt.show()
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions[1:], columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/ARIMA-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/ARIMA-true_values.csv', index=False)
 
     return predictions, test_diff, score
 

@@ -9,13 +9,13 @@ import numpy as np
 ##################################################################################################################################
 
 ##################################################################################################################################
-def ar_bike_predict(train, test, output_plots_path, timeseries_name):
+def ar_bike_predict(train, test, output_plots_path, timeseries_name, sgdr_parameters):
     train_raw = train
     test_raw = test
 
     train_size = train.shape[0] - 1
     test_size = test.shape[0]
-    num_features = 25
+    num_features = sgdr_parameters['num_features']
 
     total_data = pd.concat([train, test], axis=0)
     ######### SECTION FOR RESCALING THE TOTAL DATASET ###########
@@ -46,7 +46,7 @@ def ar_bike_predict(train, test, output_plots_path, timeseries_name):
     total_y_features = total_data[num_features - 1:]
     
     # Fill out x_features
-    for i in range(total_num_subarrays): # 12 subarrs
+    for i in range(total_num_subarrays): # 
         current_i = i + num_features # 
         x_feature = []
         for j in range(num_features):
@@ -62,7 +62,7 @@ def ar_bike_predict(train, test, output_plots_path, timeseries_name):
     start_time = time.time()
 
     # Create an object of SGDRegressor
-    ar1 = SGDRegressor(shuffle=False, learning_rate='adaptive')
+    ar1 = SGDRegressor(shuffle=False, learning_rate=sgdr_parameters['learning_rate'])
     ar1.fit(base_training_X, base_training_y)
     score = ar1.score(base_training_X, base_training_y)
     # print("AR r2-score = ", score)
@@ -118,18 +118,26 @@ def ar_bike_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/AR1-' + timeseries_name + '.png')
     # plt.show()
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions[1:], columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/AR1-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/AR1-true_values.csv', index=False)
+
     return predictions[1:], test_diff, score
 ##################################################################################################################################
 
 ##################################################################################################################################
 # Financial time series predictions
-def ar_predict(train, test, output_plots_path, timeseries_name):
+def ar_predict(train, test, output_plots_path, timeseries_name, sgdr_parameters):
     train_raw = train
     test_raw = test
 
     train_size = train.shape[0] - 1
     test_size = test.shape[0]
-    num_features = 25
+    num_features = sgdr_parameters['num_features']
 
     total_data = pd.concat([train, test], axis=0)
     total_data = total_data['Value1'].tolist()
@@ -168,7 +176,7 @@ def ar_predict(train, test, output_plots_path, timeseries_name):
     start_time = time.time()
 
     # Create an object of SGDRegressor
-    ar1 = SGDRegressor(shuffle=False, learning_rate='adaptive')
+    ar1 = SGDRegressor(shuffle=False, learning_rate=sgdr_parameters['learning_rate'])
     ar1.fit(base_training_X, base_training_y)
     score = ar1.score(base_training_X, base_training_y)
     # print("AR r2-score = ", score)
@@ -214,7 +222,13 @@ def ar_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/AR1-' + timeseries_name + '.png')
     # plt.show()
+
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions[1:], columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/AR1-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/AR1-true_values.csv', index=False)
+
     return predictions, test_diff, score
-
-    
-

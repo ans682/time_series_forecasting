@@ -24,16 +24,28 @@ defaults:
     deseasonalize: false
   sgdr:
     learning_rate: adaptive
+    # Specify the size of the 'lag', i.e. how far into the past should the model look back to make a prediction
     num_features: 25
   lstm:
     activation: relu
     optimizer: adam
     loss: mean_squared_error
-    time_steps: 25
+    time_steps: 10
     num_features: 1
     layer1_units: 10
     layer2_units: 5
     layer3_units: 5
     output_layer_units: 1
-input_path: /datasets/test_timeseries.csv
-output_path: /predictions
+    batch_size: 5
+    epochs: 100
+input_path: /Users/alemshaimardanov/PycharmProjects/Stocks_forecasting/base_ml_and_stats_models/test_ts
+output_path: /Users/alemshaimardanov/PycharmProjects/Stocks_forecasting/base_ml_and_stats_models/test_ts
+input_file_name: Bikes.csv
+time_series_name: Bike station
+bike_stations:
+  - W 20 St & 11 Ave
+  - E 17 St & Broadway
+bike_months:
+  - 2013-06-citibike-tripdata.csv
+  - 2013-07-citibike-tripdata.csv
+  - 2013-08-citibike-tripdata.csv

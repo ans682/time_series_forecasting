@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 ##################################################################################################################################
 
 ##################################################################################################################################
-def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
+def lstm_bike_predict(train, test, output_plots_path, timeseries_name, lstm_parameters):
     train_raw = train
     test_raw = test
     # Save differenced test data for future references
@@ -35,13 +35,13 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
     total_data = total_data['Value1'].values.reshape(total_data_size, 1)
 
     # Create scaler
-    scaler = MinMaxScaler(feature_range=(0, 1))
+    ### scaler = MinMaxScaler(feature_range=(0, 1))
     # Fit data into scaler
-    scaler = scaler.fit(total_data)
+    ### scaler = scaler.fit(total_data)
 
-    print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
+    ### print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
     # Transform the dataset 
-    total_data = scaler.transform(total_data).reshape(-1).tolist()
+    ### total_data = scaler.transform(total_data).reshape(-1).tolist()
     ##############################################################
 
 
@@ -66,13 +66,13 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
     y_samples = []
 
     num_rows = len(X)
-    time_steps=10  # next day's Price Prediction is based on last how many past day's prices
-    num_units = 1
+    time_steps = lstm_parameters['time_steps']  # next day's Price Prediction is based on last how many past day's prices
+    num_units = lstm_parameters['num_features']
 
     # Update train_size based on the num of time_steps
     train_size -= time_steps
 
-    # Iterate thru the values to create combinations
+    # Iterate through the values to create combinations
     for i in range(time_steps , num_rows , num_units):
         x_sample = X[i  - time_steps:i]
         y_sample = X[i]
@@ -122,19 +122,19 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
 
     # Adding the First input hidden layer and the LSTM layer
     # return_sequences = True, means the output of every time step to be shared with hidden next layer
-    regressor.add(LSTM(units = 10, activation = 'relu', input_shape = (time_steps, total_features), return_sequences=True))
+    regressor.add(LSTM(units = lstm_parameters['layer1_units'], activation=lstm_parameters['activation'], input_shape = (time_steps, total_features), return_sequences=True))
 
-    # Adding the Second Second hidden layer and the LSTM layer
-    regressor.add(LSTM(units = 5, activation = 'relu', input_shape = (time_steps, total_features), return_sequences=True))
+    # Adding the Second hidden layer and the LSTM layer
+    regressor.add(LSTM(units = lstm_parameters['layer2_units'], activation=lstm_parameters['activation'], input_shape = (time_steps, total_features), return_sequences=True))
 
-    # Adding the Second Third hidden layer and the LSTM layer
-    regressor.add(LSTM(units = 5, activation = 'relu', return_sequences=False ))
+    # Adding the Third hidden layer and the LSTM layer
+    regressor.add(LSTM(units = lstm_parameters['layer3_units'], activation=lstm_parameters['activation'], return_sequences=False ))
 
     # Adding the output layer
-    regressor.add(Dense(units = 1))
+    regressor.add(Dense(units=lstm_parameters['output_layer_units']))
 
     # Compiling the RNN
-    regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
+    regressor.compile(optimizer=lstm_parameters['optimizer'], loss=lstm_parameters['loss'])
 
     ##################################################
     # print('X test: ', X_test)
@@ -144,7 +144,7 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
     predictions = []
     StartTime=time.time()
     for i in range(test_size):
-        if i % 10 == 0: ##### CHANGE THIS TO 25
+        if i % 20 == 0: ##### 
             # Fitting the RNN to the Training set
             seen_X_test = X_test[:i].reshape(i, time_steps, 1)
             print('seen X_test shape: ', seen_X_test.shape)
@@ -152,7 +152,7 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
             input_X = np.concatenate((X_train, seen_X_test), axis=0)
             input_y = np.concatenate((y_train, y_test[:i]), axis=0)
 
-            regressor.fit(input_X, input_y, batch_size = 5, epochs = 100)
+            regressor.fit(input_X, input_y, batch_size = lstm_parameters['batch_size'], epochs = lstm_parameters['epochs'])
             print('Completed ', i, ' predictions...')
         
         # Making predictions on test data
@@ -209,14 +209,21 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name):
     plt.title(title_name, fontsize=20)
     
     plt.savefig(output_plots_path + '/LSTM-' + timeseries_name + '.png')
+    
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions_clean, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/LSTM-predictions.csv', index=False)
 
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(orig, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/LSTM-true_values.csv', index=False)
     # predictions = []
     return predictions_clean, orig, score
 
 ##################################################################################################################################
 
 ##################################################################################################################################
-def lstm_predict(train, test, output_plots_path, timeseries_name):
+def lstm_predict(train, test, output_plots_path, timeseries_name, lstm_parameters):
     train_raw = train
     test_raw = test
     # Save differenced test data for future references
@@ -250,8 +257,8 @@ def lstm_predict(train, test, output_plots_path, timeseries_name):
     y_samples = []
 
     num_rows = len(X)
-    time_steps=10  # next day's Price Prediction is based on last how many past day's prices
-    num_units = 1
+    time_steps = lstm_parameters['time_steps']  # next day's Price Prediction is based on last how many past day's prices
+    num_units = lstm_parameters['num_features']
 
     # Update train_size based on the num of time_steps
     train_size -= time_steps
@@ -306,19 +313,19 @@ def lstm_predict(train, test, output_plots_path, timeseries_name):
 
     # Adding the First input hidden layer and the LSTM layer
     # return_sequences = True, means the output of every time step to be shared with hidden next layer
-    regressor.add(LSTM(units = 10, activation = 'relu', input_shape = (time_steps, total_features), return_sequences=True))
+    regressor.add(LSTM(units = lstm_parameters['layer1_units'], activation = lstm_parameters['activation'], input_shape = (time_steps, total_features), return_sequences=True))
 
-    # Adding the Second Second hidden layer and the LSTM layer
-    regressor.add(LSTM(units = 5, activation = 'relu', input_shape = (time_steps, total_features), return_sequences=True))
+    # Adding the Second hidden layer and the LSTM layer
+    regressor.add(LSTM(units = lstm_parameters['layer2_units'], activation = lstm_parameters['activation'], input_shape = (time_steps, total_features), return_sequences=True))
 
-    # Adding the Second Third hidden layer and the LSTM layer
-    regressor.add(LSTM(units = 5, activation = 'relu', return_sequences=False ))
+    # Adding the Third hidden layer and the LSTM layer
+    regressor.add(LSTM(units = lstm_parameters['layer3_units'], activation = lstm_parameters['activation'], return_sequences=False ))
 
     # Adding the output layer
-    regressor.add(Dense(units = 1))
+    regressor.add(Dense(units = lstm_parameters['output_layer_units']))
 
     # Compiling the RNN
-    regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
+    regressor.compile(optimizer = lstm_parameters['optimizer'], loss = lstm_parameters['loss'])
 
     ##################################################
     # print('X test: ', X_test)
@@ -328,7 +335,7 @@ def lstm_predict(train, test, output_plots_path, timeseries_name):
     predictions = []
     StartTime=time.time()
     for i in range(test_size):
-        if i % 10 == 0: ##### CHANGE THIS TO 25
+        if i % 20 == 0: ##### 
             # Fitting the RNN to the Training set
             seen_X_test = X_test[:i].reshape(i, time_steps, 1)
             print('seen X_test shape: ', seen_X_test.shape)
@@ -336,7 +343,7 @@ def lstm_predict(train, test, output_plots_path, timeseries_name):
             input_X = np.concatenate((X_train, seen_X_test), axis=0)
             input_y = np.concatenate((y_train, y_test[:i]), axis=0)
 
-            regressor.fit(input_X, input_y, batch_size = 5, epochs = 100)
+            regressor.fit(input_X, input_y, batch_size = lstm_parameters['batch_size'], epochs = lstm_parameters['epochs'])
             print('Completed ', i, ' predictions...')
         
         # Making predictions on test data
@@ -394,6 +401,13 @@ def lstm_predict(train, test, output_plots_path, timeseries_name):
     
     plt.savefig(output_plots_path + '/LSTM-' + timeseries_name + '.png')
 
+    # Save predictions into CSV
+    predictions_df = pd.DataFrame(predictions_clean, columns=['Predictions'])
+    predictions_df.to_csv(output_plots_path + '/LSTM-predictions.csv', index=False)
+
+    # Save ground truth values into CSV
+    true_values_df = pd.DataFrame(orig, columns=['True_values'])
+    true_values_df.to_csv(output_plots_path + '/LSTM-true_values.csv', index=False)
     # predictions = []
     return predictions_clean, orig, score
 
