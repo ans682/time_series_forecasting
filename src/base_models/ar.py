@@ -65,7 +65,6 @@ def ar_bike_predict(train, test, output_plots_path, timeseries_name, sgdr_parame
     ar1 = SGDRegressor(shuffle=False, learning_rate=sgdr_parameters['learning_rate'])
     ar1.fit(base_training_X, base_training_y)
     score = ar1.score(base_training_X, base_training_y)
-    # print("AR r2-score = ", score)
     predictions = []
 
     # Loop through test data:
@@ -74,7 +73,6 @@ def ar_bike_predict(train, test, output_plots_path, timeseries_name, sgdr_parame
         prediction = ar1.predict([total_x_features[current_i]])
         predictions.append(prediction)
         # Retrain AR model
-        # ar1.partial_fit([total_data[current_i]], [total_y_features[current_i]])
         ar1.fit([total_x_features[current_i]], [total_y_features[current_i]])
 
     end_time = time.time()
@@ -141,9 +139,6 @@ def ar_predict(train, test, output_plots_path, timeseries_name, sgdr_parameters)
 
     total_data = pd.concat([train, test], axis=0)
     total_data = total_data['Value1'].tolist()
-
-    # Join train and test
-    # total_data = train.tolist() + test.tolist() # This is the merged list now
     
     # Difference time series, i.e. use returns
     total_data = difference(total_data)
@@ -188,7 +183,6 @@ def ar_predict(train, test, output_plots_path, timeseries_name, sgdr_parameters)
         prediction = ar1.predict([total_x_features[current_i]])
         predictions.append(prediction)
         # Retrain AR model
-        # ar1.partial_fit([total_data[current_i]], [total_y_features[current_i]])
         ar1.fit([total_x_features[current_i]], [total_y_features[current_i]])
 
     end_time = time.time()
