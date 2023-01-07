@@ -15,10 +15,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 def lstm_bike_predict(train, test, output_plots_path, timeseries_name, lstm_parameters):
     train_raw = train
     test_raw = test
-    # Save differenced test data for future references
-    # test_diff = difference(test.tolist())
 
-    train_size = train.shape[0] - 1
+    train_size = train.shape[0]
     test_size = test.shape[0]
     # num_features = 25
 
@@ -34,22 +32,7 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name, lstm_para
     # Get 'Value1' column's values
     total_data = total_data['Value1'].values.reshape(total_data_size, 1)
 
-    # Create scaler
-    ### scaler = MinMaxScaler(feature_range=(0, 1))
-    # Fit data into scaler
-    ### scaler = scaler.fit(total_data)
-
-    ### print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
-    # Transform the dataset 
-    ### total_data = scaler.transform(total_data).reshape(-1).tolist()
     ##############################################################
-
-
-    # # Difference time series, i.e. use returns
-    # total_data = difference(total_data)
-    # total_size = len(total_data)
-    # print('Size of differenced total data: ', len(total_data))
-
     # Convert to numpy array
     total_data = np.array(total_data)
     full_data = total_data.reshape(total_data.shape[0],-1)
@@ -156,9 +139,6 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name, lstm_para
             print('Completed ', i, ' predictions...')
         
         # Making predictions on test data
-        # print('printing X-test[i] ...')
-        # print(X_test[i])
-        # print('Shape of X_test[i]: ', X_test[i].shape)
         cur_x = X_test[i].reshape(1, time_steps, 1)
         print('Shape of cur x: ', cur_x.shape)
         predicted_Price = regressor.predict(cur_x)
@@ -173,27 +153,18 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name, lstm_para
     print("## Total Time Taken: ", round((EndTime-StartTime)/60), 'Minutes ##')
     print('Time executed: ', total_time)
     ##########################################################
-    print('PREDICTIONS: ', predictions)
-    print('/////////////')
-    # Measuring the accuracy of the model on test data
-    # Making predictions on test data
-    ### predicted_Price = regressor.predict(X_test)
-    ### predicted_Price = DataScaler.inverse_transform(predicted_Price)
+
 
     # Getting the original price values for testing data
     orig=y_test
     orig=DataScaler.inverse_transform(y_test)
 
-    # Accuracy of the predictions
-    # print('Accuracy:', 100 - (100*(abs(orig-predicted_Price)/orig)).mean())
 
     orig = orig.reshape(-1).tolist()
     predictions_clean = []
     for pred in predictions:
         predictions_clean.append(pred[0][0])
-    # predictions = predictions.reshape(-1).tolist()
-    print('Clean predictions: ', predictions_clean)
-    # predicted_Price = predicted_Price.reshape(-1).tolist()
+
     # Calculate the R2 score using the predictions and the true values
     score = r2_score(orig, predictions_clean)
 
@@ -226,15 +197,18 @@ def lstm_bike_predict(train, test, output_plots_path, timeseries_name, lstm_para
 def lstm_predict(train, test, output_plots_path, timeseries_name, lstm_parameters):
     train_raw = train
     test_raw = test
-    # Save differenced test data for future references
-    test_diff = difference(test.tolist())
 
     train_size = train.shape[0] - 1
     test_size = test.shape[0]
-    # num_features = 25
 
-    # Join train and test
-    total_data = train.tolist() + test.tolist() # This is the merged list now
+    total_data = pd.concat([train, test], axis=0)
+
+    total_data_size = total_data.shape[0]
+    print('Size of differenced total data: ', len(total_data))
+
+    # Get 'Value1' column's values
+    total_data = total_data['Value1'].values.reshape(total_data_size, 1)
+    ###############################
 
     # Difference time series, i.e. use returns
     total_data = difference(total_data)
@@ -246,7 +220,6 @@ def lstm_predict(train, test, output_plots_path, timeseries_name, lstm_parameter
     full_data = total_data.reshape(total_data.shape[0],-1)
 
     # Choosing between Standardization or normalization
-    #sc = StandardScaler()
     sc=MinMaxScaler()
 
     DataScaler = sc.fit(full_data)
@@ -364,27 +337,16 @@ def lstm_predict(train, test, output_plots_path, timeseries_name, lstm_parameter
     print("## Total Time Taken: ", round((EndTime-StartTime)/60), 'Minutes ##')
     print('Time executed: ', total_time)
     ##########################################################
-    print('PREDICTIONS: ', predictions)
-    print('/////////////')
-    # Measuring the accuracy of the model on test data
-    # Making predictions on test data
-    ### predicted_Price = regressor.predict(X_test)
-    ### predicted_Price = DataScaler.inverse_transform(predicted_Price)
 
     # Getting the original price values for testing data
     orig=y_test
     orig=DataScaler.inverse_transform(y_test)
 
-    # Accuracy of the predictions
-    # print('Accuracy:', 100 - (100*(abs(orig-predicted_Price)/orig)).mean())
-
     orig = orig.reshape(-1).tolist()
     predictions_clean = []
     for pred in predictions:
         predictions_clean.append(pred[0][0])
-    # predictions = predictions.reshape(-1).tolist()
-    print('Clean predictions: ', predictions_clean)
-    # predicted_Price = predicted_Price.reshape(-1).tolist()
+
     # Calculate the R2 score using the predictions and the true values
     score = r2_score(orig, predictions_clean)
 
@@ -410,4 +372,3 @@ def lstm_predict(train, test, output_plots_path, timeseries_name, lstm_parameter
     true_values_df.to_csv(output_plots_path + '/LSTM-true_values.csv', index=False)
     # predictions = []
     return predictions_clean, orig, score
-
