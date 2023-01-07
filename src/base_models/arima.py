@@ -32,18 +32,8 @@ def arima_bike_predict(train, test, output_plots_path, timeseries_name, arima_pa
     print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
     # Transform the dataset 
     total_data = scaler.transform(total_data).reshape(-1).tolist()
-
-    # total_data = total_data['Value1'].tolist()
-
-    # Join train and test
-    # total_data = train.tolist() + test.tolist() # This is the merged list now
-    
-    # Difference time series, i.e. use returns
-    # total_data = difference(total_data)
-    
     
     predictions = []
-    
     start_time = time.time()
 
     for t_i in (range(test_size)):
@@ -60,7 +50,6 @@ def arima_bike_predict(train, test, output_plots_path, timeseries_name, arima_pa
     print("Time executed: ", total_time)
     print("Size of predictions: ", len(predictions))
 
-    # test_diff = difference(test_raw['Value1']
     test_diff = test_raw['Value1'].tolist()
 
 ############################################################
@@ -114,9 +103,6 @@ def arima_predict(train, test, output_plots_path, timeseries_name, arima_paramet
     # num_features = 25
     total_data = pd.concat([train, test], axis=0)
     total_data = total_data['Value1'].tolist()
-
-    # Join train and test
-    # total_data = train.tolist() + test.tolist() # This is the merged list now
     
     # Difference time series, i.e. use returns
     total_data = difference(total_data)
@@ -167,6 +153,3 @@ def arima_predict(train, test, output_plots_path, timeseries_name, arima_paramet
     true_values_df.to_csv(output_plots_path + '/ARIMA-true_values.csv', index=False)
 
     return predictions, test_diff, score
-
-
-#################################################
