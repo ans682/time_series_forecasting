@@ -37,11 +37,11 @@ defaults:
     layer3_units: 5
     output_layer_units: 1
     batch_size: 5
-    epochs: 100
+    epochs: 10
 input_path: /Users/alemshaimardanov/PycharmProjects/Stocks_forecasting/base_ml_and_stats_models/test_ts
 output_path: /Users/alemshaimardanov/PycharmProjects/Stocks_forecasting/base_ml_and_stats_models/test_ts
 input_file_name: Bikes.csv
-time_series_name: Bike station
+time_series_name: W 20 St & 11 Ave Bike station
 bike_stations:
   - W 20 St & 11 Ave
   - E 17 St & Broadway
