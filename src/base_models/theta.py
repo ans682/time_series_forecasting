@@ -167,6 +167,3 @@ def theta_predict(train, test, output_plots_path, timeseries_name, theta_paramet
     true_values_df = pd.DataFrame(test_diff, columns=['True_values'])
     true_values_df.to_csv(output_plots_path + '/Theta-true_values.csv', index=False)
     return predictions, test_diff, score
-
-
-#################################################
