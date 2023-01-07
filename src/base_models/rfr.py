@@ -18,7 +18,6 @@ def rfr_bike_predict(train, test, output_plots_path, timeseries_name, rfr_parame
     num_features = 25
 
     # Join train and test
-    # total_data = train.tolist() + test.tolist() # This is the merged list now
     total_data = pd.concat([train, test], axis=0)
 
     ######### SECTION FOR RESCALING THE TOTAL DATASET ###########
@@ -38,11 +37,6 @@ def rfr_bike_predict(train, test, output_plots_path, timeseries_name, rfr_parame
     # Transform the dataset 
     total_data = scaler.transform(total_data).reshape(-1).tolist()
     ##############################################################
-    
-    # Difference time series, i.e. use returns
-    # total_data = difference(total_data)
-    # total_size = len(total_data)
-    # print('Size of differenced total data: ', len(total_data))
 
     # Number of subarrays
     total_num_subarrays = total_data_size - num_features + 1
@@ -156,9 +150,6 @@ def rfr_predict(train, test, output_plots_path, timeseries_name, rfr_parameters)
     total_data = total_data['Value1'].values.reshape(total_data_size, 1)
     print('total_data: ', total_data.shape)
     total_data = total_data.reshape(-1).tolist()
-    # ///
-    # Join train and test
-    # total_data = train.tolist() + test.tolist() # This is the merged list now
     
     # Difference time series, i.e. use returns
     total_data = difference(total_data)
