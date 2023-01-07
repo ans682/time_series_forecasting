@@ -17,7 +17,6 @@ def var_bike_predict(train, test, output_plots_path, timeseries_name, p):
     test_size = test.shape[0]
 
     # Join train and test
-    ### total_data = train.tolist() + test.tolist() # This is the merged list now. IF UNIVARIATE TS
     total_data = pd.concat([train, test], axis=0)
     total_data = total_data[['Value1', 'Value2']]
 
@@ -29,7 +28,6 @@ def var_bike_predict(train, test, output_plots_path, timeseries_name, p):
     # Get 'Value1' column's values
     total_data_val1 = total_data['Value1'].values.reshape(total_data_size, 1)
     total_data_val2 = total_data['Value2'].values.reshape(total_data_size, 1)
-    # total_data = pd.concat([total_data_val1, total_data_val2], axis=1)
 
     # Create scaler
     scaler_val1 = MinMaxScaler(feature_range=(0, 1))
@@ -54,31 +52,10 @@ def var_bike_predict(train, test, output_plots_path, timeseries_name, p):
     print('Total shape: ', total_data.shape)
     ##############################################################
 
-    # total_data['Value2'] = total_data['Value2'].astype(int)
-
-
-    # Difference time series, i.e. use returns
-    ### total_data = difference(total_data) # IF UNIVARIATE TS
-    ### total_size = len(total_data) # IF UNIVARIATE TS
-    ### print('Size of differenced total data: ', len(total_data)) # IF UNIVARIATE TS
-
     # Save original data in order to be able to convert differenced values back to the original values.
-    # test_start_idx = total_data.shape[0] - test_size
-    # original_val1 = total_data['Value1'][test_start_idx]
     original_val1 = test_raw['Value1'].iloc[0]
     
     print('Orig test data: ', original_val1)
-
-    ### Difference total_data
-    # total_data = total_data.diff().dropna()
-    # differenced_val1 = total_data['Value1'].iloc[1:]
-
-    # print('------')
-    # print(differenced_val1)
-    # print('------')
-    print('Orig val: ',original_val1)
-    # print('Shape of differenced data: ',differenced_val1.shape)
-    
 
     delta_train_df = total_data[:-test_size]
     delta_test_df = total_data[-test_size:]
@@ -129,15 +106,9 @@ def var_bike_predict(train, test, output_plots_path, timeseries_name, p):
     print(len(value1_predictions))
 
     predictions = value1_predictions
-    # test_diff = delta_test_df['Value1'].tolist()
-    # print('Test diff shape: ', len(test_diff))
 
     test_diff = test_raw['Value1'].tolist()
 ############################################################
-
-    # De-difference predictions
-    # predictions = np.r_[original_val1, predictions].cumsum().astype(int)
-    # predictions = predictions.tolist()
 
     # Convert predictions from list into numpy array. Then reshape into 2d array.
     predictions_size = len(predictions)
@@ -190,15 +161,9 @@ def var_predict(train, test, output_plots_path, timeseries_name, p):
     test_size = test.shape[0]
 
     # Join train and test
-    ### total_data = train.tolist() + test.tolist() # This is the merged list now. IF UNIVARIATE TS
     total_data = pd.concat([train, test], axis=0)
     total_data = total_data[['Value1', 'Value2']]
     total_data['Value2'] = total_data['Value2'].astype(int)
-
-    # Difference time series, i.e. use returns
-    ### total_data = difference(total_data) # IF UNIVARIATE TS
-    ### total_size = len(total_data) # IF UNIVARIATE TS
-    ### print('Size of differenced total data: ', len(total_data)) # IF UNIVARIATE TS
 
     total_data = total_data.diff().dropna()
     delta_train_df = total_data[:-test_size]
