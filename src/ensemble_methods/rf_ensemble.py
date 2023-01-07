@@ -8,9 +8,6 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import copy
 
-# input_path = '/Users/alemshaimardanov/PycharmProjects/Stocks_forecasting/base_ml_and_stats_models/bikes'
-##################################################################################################################################
-
 ##################################################################################################################################
 #RFR Meta Model
 def rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, base_model_predictions):
@@ -36,36 +33,14 @@ def rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, b
     base_model_names = base_models_df.columns.tolist()
 
     total_data = pd.concat([train, test], axis=0)
-    ## total_data = total_data['Value1'].tolist()
 
-    
-    
-    # Difference time series, i.e. use returns
-    # total_data = difference(total_data)
     total_data_size = total_data.shape[0]
-    # print('Size of total data: ', len(total_data))
 
-
-    ######### SECTION FOR RESCALING THE TOTAL DATASET ###########
-    # total_data_size = total_data.shape[0]
-    # print('Size of differenced total data: ', len(total_data))
-    # print('Type of total data: ', type(total_data))
-
-    # Get 'Value1' column's values
-    # total_data = total_data['Value1'].values.reshape(total_data_size, 1)
-    
+    ######### SECTION FOR RESCALING THE TOTAL DATASET ###########   
     # Create scaler
     scaler = MinMaxScaler(feature_range=(0, 1))
 
     base_models_df[base_model_names] = scaler.fit_transform(base_models_df[base_model_names])
-
-    
-    # # Fit data into scaler
-    # scaler = scaler.fit(total_data)
-
-    # print('Min: %f, Max: %f' % (scaler.data_min_, scaler.data_max_))
-    # Transform the dataset 
-    # total_data = scaler.transform(total_data).reshape(-1).tolist()
     ##############################################################
     
     predictions_meta_rfr = []
@@ -85,7 +60,6 @@ def rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, b
         for b_m in range(num_base_models):
             meta_X_instance.append(base_models_df.iloc[i][b_m])
 
-        # meta_X_instance = [base_models_df.iloc[i][0], base_models_df.iloc[i][1], base_models_df.iloc[i][2], base_models_df.iloc[i][3]]
         meta_X.append(meta_X_instance)
     
     start_time = time.time()
@@ -101,29 +75,20 @@ def rfr_ensemble_bike_predict(train, test, output_plots_path, timeseries_name, b
         meta_instance = []
         for b_m in range(num_base_models):
             meta_instance.append(base_models_df.iloc[current_t][b_m])
-        # meta_instance = [base_models_df.iloc[current_t][0], base_models_df.iloc[current_t][1], base_models_df.iloc[current_t][2], base_models_df.iloc[current_t][3]]
         meta_X.append(meta_instance)
         print('SHAPE of New META X: ', len(meta_X))
-        # print('Size of NEW test_diff: ', len(test_diff[:current_t + 1]))
 
         meta_current_instance = []
         for b_m in range(num_base_models):
             meta_current_instance.append(base_models_df.iloc[current_t][b_m])
         prediction = meta_model_rfr.predict([meta_current_instance])
-        # prediction = meta_model_rfr.predict([[base_models_df.iloc[current_t][0], base_models_df.iloc[current_t][1], base_models_df.iloc[current_t][2], base_models_df.iloc[current_t][3]]])
         predictions_meta_rfr.append(prediction)
-        # meta_X.append([all_predictions[0][current_t][0], all_predictions[1][current_t], all_predictions[2][current_t][0], all_predictions[3][current_t]])
     
     end_time = time.time()
     total_time = end_time - start_time
     print("Time executed: ", total_time)
     print("Size of META RFR predictions: ", len(predictions_meta_rfr))
     print('Size of Test: ', len(test_diff))
-    
-    
-    
-    # Calculate the R2 score using the predictions and the true values
-    # test_diff = test_diff[-new_test_size:]
     
     # Inverse transform the predictions
 ############################################################
@@ -203,9 +168,6 @@ def rfr_ensemble_predict(train, test, output_plots_path, timeseries_name, base_m
     
     total_data_size = total_data.shape[0]
     total_data = total_data['Value1'].tolist()
-
-    # Join train and test
-    # total_data = train.tolist() + test.tolist() # This is the merged list now
     
     # Difference time series, i.e. use returns
     total_data = difference(total_data)
